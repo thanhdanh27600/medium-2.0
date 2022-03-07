@@ -89,3 +89,12 @@ export interface Slug {
   _type: string
   current: string
 }
+export interface User {
+  googleId: string
+  imageUrl: string
+  email: string
+  name: string
+  givenName: string
+  familyName: string
+}
+

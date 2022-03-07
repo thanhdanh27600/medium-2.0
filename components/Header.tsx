@@ -1,7 +1,44 @@
 import Link from 'next/link'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { useGoogleLogin, useGoogleLogout } from 'react-google-login'
+import { refreshTokenSetup } from '../pages/api/refreshToken'
+import { User } from '../typing'
 
-function Header() {
+function Header({ setUser, user, error, setError }: any) {
+  // refresh token
+
+  const clientId =
+    '788505629167-v648vgsorglc1gkcu109q5769fuab0rd.apps.googleusercontent.com'
+
+  const onSuccess = (res: any) => {
+    setUser(res.profileObj)
+    refreshTokenSetup(res)
+  }
+
+  const onFailure = (res?: any) => {
+    setError(res)
+  }
+  const onLogoutSuccess = () => {
+    setUser({} as User)
+    console.log('Logged out Success')
+    alert('Logged out Successfully ✌')
+  }
+  const { signIn } = useGoogleLogin({
+    onSuccess,
+    onFailure,
+    clientId,
+    isSignedIn: true,
+    accessType: 'offline',
+    // responseType: 'code',
+    // prompt: 'consent',
+  })
+
+  const { signOut } = useGoogleLogout({
+    clientId,
+    onLogoutSuccess,
+    onFailure,
+  })
+
   return (
     <header className="mx-auto flex max-w-7xl justify-between p-5">
       <div className="flex items-center space-x-5">
@@ -22,9 +59,16 @@ function Header() {
         </div>
       </div>
       <div className="text-grew flex items-center space-x-5 text-sky-600">
-        <h3>Sign in</h3>
-        <h3 className="rounded-full border border-sky-600 px-4 py-1">
-          Get Started
+        {user?.givenName && <h4>Welcome {user?.givenName}</h4>}
+        {error && (
+          <h4 className="absolute top-16 text-red-600">{error.details}</h4>
+        )}
+        <h3 className="rounded-full border border-sky-600 px-4 py-1 hover:cursor-pointer hover:bg-sky-200 hover:underline">
+          {!user?.email ? (
+            <button onClick={signIn}>Sign in</button>
+          ) : (
+            <button onClick={signOut}>Sign out</button>
+          )}
         </h3>
       </div>
     </header>
